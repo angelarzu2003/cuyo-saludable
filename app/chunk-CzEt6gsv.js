@@ -1,0 +1,1 @@
+import {m,aH as ct,aI as ts,aJ as ee}from'./main-ABXUK66Q.js';function w(t){t||(t=m(ct));let i=new ee(e=>{if(t.destroyed){e.next();return}return t.onDestroy(e.next.bind(e))});return e=>e.pipe(ts(i))}export{w};

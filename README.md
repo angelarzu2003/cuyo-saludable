@@ -21,7 +21,7 @@ Cada evaluación se guarda en una base de datos MySQL. La app sigue funcionando 
 |-------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | Proyecto Ionic funcional      | `ionic-app/`, ya compilado en `app/` y servido por XAMPP                                                            |
 | Navegación                    | Login + 4 pestañas (Mis cuyos, Evaluar, Historial, Perfil) + páginas de detalle y formulario. Ver [mapa](#-navegación) |
-| Modelo de datos               | 6 tablas relacionadas ([diagrama](#-modelo-de-datos)) + interfaces TypeScript en `src/app/models/`                  |
+| Modelo de datos               | 6 tablas relacionadas ([diagrama](#-modelo-de-datos)) + todas las interfaces TypeScript juntas en `src/app/interfaces/` |
 | CRUD                          | **Cuyos**: crear, leer, editar y eliminar. **Evaluaciones**: crear, leer y eliminar                                  |
 | Persistencia                  | MySQL en el servidor; `localStorage` en el dispositivo (sesión, caché y cola offline)                                |
 | Manejo de errores             | Validaciones en front y back, errores tipados (`ApiError`), sesión expirada, manejador global. Ver [detalle](#-manejo-de-errores) |
@@ -84,9 +84,15 @@ proyecto/
         │   ├── notify.service.ts      # Toasts
         │   ├── global-error-handler.ts
         │   └── auth.guard.ts
-        ├── models/                # user, cuyo, diet (tipos de datos)
+        ├── interfaces/            # TODAS las interfaces y tipos de datos
+        │   ├── index.ts               # Exporta todo: import { Cuyo } from '../interfaces'
+        │   ├── user.interface.ts      # User, LoginResponse
+        │   ├── cuyo.interface.ts      # Cuyo, CuyoForm, CuyoSex
+        │   ├── food.interface.ts      # Food, FoodCategory, FoodSection
+        │   ├── evaluation.interface.ts# EvaluationSummary, EvaluationDetail, PendingEvaluation...
+        │   └── api.interface.ts       # ApiErrorKind
         ├── services/              # auth, cuyo, diet (lógica de negocio del frontend)
-        ├── shared/                # Componentes reutilizables (resultado, aviso offline, pipe de edad)
+        ├── shared/                # Reutilizables: resultado, aviso offline, pipe de edad, niveles de salud
         └── pages/                 # login, tabs, cuyos, cuyo-form, cuyo-detail,
                                    # evaluate, history, evaluation-detail, profile
 ```

@@ -130,6 +130,24 @@ Pruebas unitarias: **4 archivos, 11 pruebas, todas aprobadas**.
 
 ---
 
+## Sesión 4 — 01/10/2026 · Interfaces en una sola carpeta
+
+### Petición del estudiante
+> *"Quiero que las interfaces las pongas en una carpeta juntas. Reestructura el proyecto para eso."*
+
+### Qué hizo la IA
+- Buscó **todas** las interfaces y tipos del frontend. Estaban repartidas en `models/`, `auth.service.ts` (`LoginResponse`), `evaluate.page.ts` (`Section`) y `api.service.ts` (`ApiErrorKind`).
+- Las reunió en `src/app/interfaces/`, con un archivo por tema (`user`, `cuyo`, `food`, `evaluation`, `api`) y un `index.ts` que las exporta todas. Así, cualquier archivo las importa con `import { Cuyo } from '../interfaces'`.
+- Renombró `Section` a `FoodSection`, que describe mejor lo que es.
+- Movió la constante `HEALTH_LEVELS` a `shared/health-levels.ts`, porque es un dato y no una interfaz. Su forma quedó definida como la interfaz `HealthLevelInfo`.
+- Usó `git mv` para conservar el historial de los archivos movidos.
+
+### Verificación
+- Búsqueda: no queda ninguna `interface` ni `type` fuera de `interfaces/`.
+- Compilación correcta, 11/11 pruebas unitarias y prueba de punta a punta completa sin errores.
+
+---
+
 ## Uso responsable de la IA
 
 - **Lo generado por la IA se verificó:** ningún cambio se dio por terminado sin compilarlo, ejecutarlo y probarlo, incluidos los casos de error.

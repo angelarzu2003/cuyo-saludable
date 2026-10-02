@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService, isNetworkError } from '../core/api.service';
 import { SyncService } from '../core/sync.service';
-import { EvaluationDetail, EvaluationRequest, EvaluationSummary, Food } from '../models/diet.model';
+import { EvaluationDetail, EvaluationRequest, EvaluationSummary, Food } from '../interfaces';
 
 /** Alimentos y evaluaciones de dieta (api/foods.php y api/evaluations.php). */
 @Injectable({ providedIn: 'root' })

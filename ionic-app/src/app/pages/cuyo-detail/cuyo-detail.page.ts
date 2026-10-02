@@ -4,12 +4,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular/lazy';
 import { ApiError } from '../../core/api.service';
 import { NotifyService } from '../../core/notify.service';
-import { Cuyo } from '../../models/cuyo.model';
-import { EvaluationSummary, HEALTH_LEVELS } from '../../models/diet.model';
 import { CuyoService } from '../../services/cuyo.service';
 import { DietService } from '../../services/diet.service';
 import { AgePipe } from '../../shared/age.pipe';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { Cuyo, EvaluationSummary } from '../../interfaces';
+import { HEALTH_LEVELS } from '../../shared/health-levels';
 
 /** Datos de un cuyo, su historial de dietas y acciones (evaluar, editar, eliminar). */
 @Component({

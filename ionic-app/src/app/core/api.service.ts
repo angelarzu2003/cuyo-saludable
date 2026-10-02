@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import axios, { AxiosRequestConfig } from 'axios';
 import { environment } from '../../environments/environment';
+import { ApiErrorKind } from '../interfaces';
 import { ConnectivityService } from './connectivity.service';
 import { SessionService } from './session.service';
 import { StorageService } from './storage.service';
@@ -10,9 +11,6 @@ const API_URL_KEY = 'apiUrl';
 const CACHE_PREFIX = 'cache:';
 const TIMEOUT_MS = 8000;
 const SERVER_UNREACHABLE = [502, 503, 504];
-
-/** Tipos de error que puede producir una petición. */
-export type ApiErrorKind = 'network' | 'unauthorized' | 'validation' | 'not_found' | 'server';
 
 /** Error de la API con un mensaje listo para mostrar al usuario. */
 export class ApiError extends Error {

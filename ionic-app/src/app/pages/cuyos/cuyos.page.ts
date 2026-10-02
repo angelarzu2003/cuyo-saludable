@@ -2,11 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonicModule, RefresherCustomEvent } from '@ionic/angular/lazy';
 import { NotifyService } from '../../core/notify.service';
-import { Cuyo } from '../../models/cuyo.model';
-import { HEALTH_LEVELS } from '../../models/diet.model';
 import { CuyoService } from '../../services/cuyo.service';
 import { AgePipe } from '../../shared/age.pipe';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { Cuyo } from '../../interfaces';
+import { HEALTH_LEVELS } from '../../shared/health-levels';
 
 /** Lista de cuyos del usuario (READ del CRUD). */
 @Component({

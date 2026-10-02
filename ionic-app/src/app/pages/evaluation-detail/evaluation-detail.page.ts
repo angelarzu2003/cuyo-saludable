@@ -3,10 +3,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular/lazy';
 import { NotifyService } from '../../core/notify.service';
-import { EvaluationDetail } from '../../models/diet.model';
 import { DietService } from '../../services/diet.service';
 import { DietResultComponent } from '../../shared/diet-result.component';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { EvaluationDetail } from '../../interfaces';
 
 /** Detalle de una evaluación guardada: puntaje, recomendaciones y lo que comió. */
 @Component({

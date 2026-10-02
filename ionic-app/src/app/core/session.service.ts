@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { User } from '../models/user.model';
 import { StorageService } from './storage.service';
+import { User } from '../interfaces';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';

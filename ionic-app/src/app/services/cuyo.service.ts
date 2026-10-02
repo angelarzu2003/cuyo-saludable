@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Cuyo, CuyoForm } from '../models/cuyo.model';
+import { Cuyo, CuyoForm } from '../interfaces';
 
 /** CRUD de cuyos contra api/cuyos.php. Las lecturas usan caché para funcionar offline. */
 @Injectable({ providedIn: 'root' })

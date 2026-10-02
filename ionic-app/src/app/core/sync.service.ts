@@ -1,10 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { EvaluationRequest, PendingEvaluation } from '../models/diet.model';
 import { ApiService, isNetworkError } from './api.service';
 import { NotifyService } from './notify.service';
 import { SessionService } from './session.service';
 import { StorageService } from './storage.service';
+import { EvaluationRequest, PendingEvaluation } from '../interfaces';
 
 const QUEUE_KEY = 'pendingEvaluations';
 const RETRY_INTERVAL_MS = 30_000;

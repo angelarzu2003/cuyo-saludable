@@ -5,9 +5,10 @@ import { RouterLink } from '@angular/router';
 import { AlertController, IonicModule, RefresherCustomEvent } from '@ionic/angular/lazy';
 import { NotifyService } from '../../core/notify.service';
 import { SyncService } from '../../core/sync.service';
-import { EvaluationSummary, HEALTH_LEVELS } from '../../models/diet.model';
 import { DietService } from '../../services/diet.service';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { EvaluationSummary } from '../../interfaces';
+import { HEALTH_LEVELS } from '../../shared/health-levels';
 
 /** Todas las evaluaciones: las pendientes (offline) y las guardadas en el servidor. */
 @Component({

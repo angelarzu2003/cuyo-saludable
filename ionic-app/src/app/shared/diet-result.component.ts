@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { IonicModule } from '@ionic/angular/lazy';
-import { EvaluationDetail, FeedbackType, HEALTH_LEVELS } from '../models/diet.model';
+import { EvaluationDetail, FeedbackType } from '../interfaces';
+import { HEALTH_LEVELS } from './health-levels';
 
 /** Ícono y color de cada tipo de recomendación. */
 const FEEDBACK_ICONS: Record<FeedbackType, { icon: string; color: string }> = {

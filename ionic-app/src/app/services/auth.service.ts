@@ -2,13 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
 import { SessionService } from '../core/session.service';
 import { SyncService } from '../core/sync.service';
-import { User } from '../models/user.model';
-
-interface LoginResponse {
-  token: string;
-  expires_at: string;
-  user: User;
-}
+import { LoginResponse } from '../interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

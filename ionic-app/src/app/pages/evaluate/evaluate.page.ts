@@ -4,26 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonicModule } from '@ionic/angular/lazy';
 import { NotifyService } from '../../core/notify.service';
-import { Cuyo } from '../../models/cuyo.model';
-import { CartItem, EvaluationDetail, Food, FoodCategory } from '../../models/diet.model';
 import { CuyoService } from '../../services/cuyo.service';
 import { DietService } from '../../services/diet.service';
 import { DietResultComponent } from '../../shared/diet-result.component';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { CartItem, Cuyo, EvaluationDetail, Food, FoodSection } from '../../interfaces';
 
 /** Máximo de porciones por alimento (igual que en el backend). */
 const MAX_PORTIONS = 10;
 
-interface Section {
-  title: string;
-  hint: string;
-  categories: FoodCategory[];
-  isDanger?: boolean;
-  foods: Food[];
-}
-
 /** Secciones del formulario: agrupan categorías y explican cuánto dar de cada una. */
-const SECTIONS: Omit<Section, 'foods'>[] = [
+const SECTIONS: Omit<FoodSection, 'foods'>[] = [
   { title: 'Lo básico', hint: 'Heno y agua ilimitados, todos los días.', categories: ['heno', 'agua'] },
   { title: 'Verduras', hint: 'De 3 a 6 porciones al día. Son su fuente de vitamina C.', categories: ['verdura'] },
   { title: 'Pellets', hint: 'Una cucharada al día como complemento.', categories: ['pellet'] },
@@ -43,7 +34,7 @@ export class EvaluatePage implements OnInit {
   private notify = inject(NotifyService);
 
   // --- Estado de la pantalla ---
-  sections = signal<Section[]>([]);
+  sections = signal<FoodSection[]>([]);
   cuyos = signal<Cuyo[]>([]);
   cuyoId = signal<number | null>(null);
   cart = signal<Record<number, number>>({}); // food_id -> porciones elegidas

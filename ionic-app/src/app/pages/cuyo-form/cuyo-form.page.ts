@@ -3,9 +3,9 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular/lazy';
 import { NotifyService } from '../../core/notify.service';
-import { CuyoSex } from '../../models/cuyo.model';
 import { CuyoService } from '../../services/cuyo.service';
 import { OfflineBannerComponent } from '../../shared/offline-banner.component';
+import { CuyoSex } from '../../interfaces';
 
 /** Formulario para CREAR un cuyo (/cuyos/nuevo) o EDITARLO (/cuyos/:id/editar). */
 @Component({
