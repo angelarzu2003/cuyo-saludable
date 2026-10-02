@@ -1,0 +1,6 @@
+# Apache (XAMPP): si la URL no es un archivo real (ej: /proyecto/app/home),
+# entrega index.html para que Angular resuelva la ruta.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

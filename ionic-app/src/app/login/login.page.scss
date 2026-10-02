@@ -1,0 +1,51 @@
+// Centra la tarjeta de login en la pantalla
+.login-wrapper {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 24px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--app-shadow);
+  text-align: center;
+}
+
+.logo {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  background: var(--app-primary-soft);
+  border-radius: 50%;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 4px 0 24px;
+  color: var(--ion-color-medium);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-hint {
+  margin: 20px 0 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}

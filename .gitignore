@@ -1,0 +1,20 @@
+# Dependencias y archivos generados del frontend
+node_modules/
+ionic-app/www/
+ionic-app/.angular/
+ionic-app/coverage/
+
+# Android (se regenera con Capacitor)
+ionic-app/android/app/build/
+ionic-app/android/.gradle/
+ionic-app/android/build/
+ionic-app/android/local.properties
+*.keystore
+
+# Sistema / editor
+*.log
+.DS_Store
+Thumbs.db
+
+# NOTA: la carpeta app/ (frontend compilado) SÍ se versiona,
+# para poder desplegar en XAMPP sin necesidad de Node.

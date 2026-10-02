@@ -1,0 +1,149 @@
+// Contenedor centrado con ancho máximo (se ve bien en PC y celular)
+.page,
+.cart-bar {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-weight: 800;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.intro {
+  margin-bottom: 24px;
+
+  p {
+    margin: 0 0 16px;
+    color: var(--ion-color-medium-shade);
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+// --- Secciones de alimentos ---
+.food-section {
+  margin-bottom: 28px;
+
+  .hint {
+    margin: 2px 0 12px;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+
+  &.danger h2 {
+    color: var(--ion-color-danger);
+  }
+}
+
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.food-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 4px;
+  text-align: center;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  box-shadow: var(--app-shadow);
+  transition: border-color 0.2s, background 0.2s;
+
+  .emoji {
+    font-size: 2.4rem;
+  }
+
+  small {
+    color: var(--ion-color-medium);
+  }
+
+  &.selected {
+    border-color: var(--ion-color-primary);
+    background: var(--app-primary-soft);
+  }
+
+  .danger &.selected {
+    border-color: var(--ion-color-danger);
+    background: #fdecec;
+  }
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+
+  ion-icon {
+    font-size: 1.7rem;
+  }
+
+  .quantity {
+    min-width: 24px;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+}
+
+// --- Historial ---
+.history ion-list {
+  margin-top: 12px;
+  border-radius: 16px;
+  box-shadow: var(--app-shadow);
+}
+
+// --- Barra del carrito ---
+.cart-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+
+  .cart-total {
+    flex: 1;
+  }
+}
+
+// --- Resultado ---
+.result-summary {
+  text-align: center;
+
+  .score {
+    width: 130px;
+    height: 130px;
+    margin: 8px auto 16px;
+    display: grid;
+    place-content: center;
+    font-size: 2.6rem;
+    font-weight: 800;
+    border: 10px solid currentColor;
+    border-radius: 50%;
+
+    small {
+      font-size: 0.9rem;
+    }
+
+    &.excelente { color: var(--ion-color-success); }
+    &.buena     { color: var(--ion-color-primary); }
+    &.regular   { color: var(--ion-color-warning); }
+    &.peligro   { color: var(--ion-color-danger); }
+  }
+}
+
+.result-actions {
+  margin-top: 16px;
+}
