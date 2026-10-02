@@ -1,1 +1,0 @@
-import {bt as n$1}from'./main-MIOFIOGJ.js';var n=()=>{if(n$1!==void 0)return n$1.Capacitor};export{n};

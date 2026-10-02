@@ -1,0 +1,1 @@
+import {as as wh}from'./main-FDXDDHJK.js';var c=(()=>{class t{transform(r){let e=Math.floor(r/12),s=r%12,i=e===1?"1 a\xF1o":`${e} a\xF1os`,n=s===1?"1 mes":`${s} meses`;return e===0?n:s===0?i:`${i} y ${n}`}static{this.\u0275fac=function(e){return new(e||t)};}static{this.\u0275pipe=wh({name:"age",type:t,pure:true});}}return t})();export{c};

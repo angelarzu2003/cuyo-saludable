@@ -3,4 +3,5 @@
 export const environment = {
   production: true,
   apiUrl: '/proyecto/api',
+  serviceWorker: true, // guarda la app para que abra sin conexión
 };
