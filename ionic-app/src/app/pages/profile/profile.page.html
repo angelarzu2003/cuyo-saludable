@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>👤 Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page">
+    <!-- Usuario -->
+    <div class="card profile">
+      <div class="avatar big">🧑‍🌾</div>
+      <h1>{{ user()?.name }}</h1>
+      <p>{{ user()?.email }}</p>
+    </div>
+
+    <!-- Conexión y sincronización (operación offline) -->
+    <h2 class="section-title">Conexión</h2>
+    <ion-list class="card-list">
+      <ion-item>
+        <ion-icon slot="start" [name]="connectivity.isOnline() ? 'cloud-done-outline' : 'cloud-offline-outline'"></ion-icon>
+        <ion-label>Estado</ion-label>
+        <ion-badge slot="end" [color]="connectivity.isOnline() ? 'success' : 'warning'">
+          {{ connectivity.isOnline() ? 'En línea' : 'Sin conexión' }}
+        </ion-badge>
+      </ion-item>
+      <ion-item>
+        <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+        <ion-label>Evaluaciones pendientes</ion-label>
+        <ion-note slot="end">{{ sync.pending().length }}</ion-note>
+      </ion-item>
+    </ion-list>
+    <ion-button
+      expand="block"
+      fill="outline"
+      [disabled]="sync.pending().length === 0 || sync.isSyncing()"
+      (click)="sync.sync()"
+    >
+      <ion-icon slot="start" name="sync-outline"></ion-icon>
+      {{ sync.isSyncing() ? 'Sincronizando...' : 'Sincronizar ahora' }}
+    </ion-button>
+
+    <!-- Servidor (útil al instalar la app en un celular) -->
+    <h2 class="section-title">Servidor</h2>
+    <div class="card">
+      <ion-input
+        label="URL de la API"
+        labelPlacement="floating"
+        fill="outline"
+        helperText="Ej: http://192.168.1.50/proyecto/api (la IP de la PC con XAMPP)"
+        [(ngModel)]="serverUrl"
+      ></ion-input>
+      <ion-button expand="block" class="ion-margin-top" (click)="saveServerUrl()">Guardar servidor</ion-button>
+    </div>
+
+    <ion-button expand="block" color="danger" (click)="confirmLogout()">
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Cerrar sesión
+    </ion-button>
+
+    <p class="hint ion-text-center">Cuyo Saludable · versión {{ appVersion }}</p>
+  </div>
+</ion-content>

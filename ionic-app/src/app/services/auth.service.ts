@@ -1,13 +1,8 @@
-import { Injectable } from '@angular/core';
-import { getErrorMessage, http, TOKEN_KEY } from './http';
-
-const USER_KEY = 'user';
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+import { Injectable, inject } from '@angular/core';
+import { ApiService } from '../core/api.service';
+import { SessionService } from '../core/session.service';
+import { SyncService } from '../core/sync.service';
+import { User } from '../models/user.model';
 
 interface LoginResponse {
   token: string;
@@ -15,32 +10,27 @@ interface LoginResponse {
   user: User;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  /** Inicia sesión y guarda el token y el usuario en localStorage. */
+  private api = inject(ApiService);
+  private session = inject(SessionService);
+  private sync = inject(SyncService);
+
+  /** Inicia sesión y guarda el token y el usuario en el dispositivo. */
   async login(email: string, password: string): Promise<void> {
+    const data = await this.api.post<LoginResponse>('/login.php', { email, password });
+    this.session.start(data.token, data.user);
+  }
+
+  /** Cierra sesión en el servidor (si hay conexión) y borra los datos locales. */
+  async logout(): Promise<void> {
     try {
-      const { data } = await http.post<LoginResponse>('/login.php', { email, password });
-      localStorage.setItem(TOKEN_KEY, data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-    } catch (error) {
-      throw new Error(getErrorMessage(error, 'Error al iniciar sesión'));
+      await this.api.post('/logout.php');
+    } catch {
+      // Sin conexión no importa: el token expira solo en el servidor
     }
-  }
-
-  logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
-  }
-
-  getUser(): User | null {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    this.session.clear();
+    this.api.clearCache();
+    this.sync.clear();
   }
 }

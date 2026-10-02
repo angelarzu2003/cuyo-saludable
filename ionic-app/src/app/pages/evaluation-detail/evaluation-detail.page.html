@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/historial"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Evaluación</ion-title>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (evaluation(); as evaluation) {
+    <div class="page">
+      <div class="card">
+        <app-diet-result [evaluation]="evaluation" />
+        <p class="hint ion-text-center">{{ evaluation.created_at | date: "dd/MM/yyyy 'a las' HH:mm" }}</p>
+      </div>
+
+      <h2 class="section-title">Lo que comió</h2>
+      <ion-list class="card-list">
+        @for (item of evaluation.items; track item.name) {
+          <ion-item>
+            <span slot="start" class="avatar">{{ item.emoji }}</span>
+            <ion-label>{{ item.name }}</ion-label>
+            <ion-note slot="end">× {{ item.quantity }}</ion-note>
+          </ion-item>
+        }
+      </ion-list>
+
+      <ion-button expand="block" fill="outline" color="danger" (click)="confirmDelete()">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
+        Eliminar evaluación
+      </ion-button>
+    </div>
+  } @else {
+    <div class="center-spinner"><ion-spinner name="crescent"></ion-spinner></div>
+  }
+</ion-content>

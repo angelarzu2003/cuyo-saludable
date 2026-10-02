@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/cuyos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ cuyo()?.name ?? 'Cuyo' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [routerLink]="['/tabs/cuyos', id, 'editar']" aria-label="Editar">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (cuyo(); as cuyo) {
+    <div class="page">
+      <!-- Ficha del cuyo -->
+      <div class="card profile">
+        <div class="avatar big">🐹</div>
+        <h1>{{ cuyo.name }}</h1>
+        <p>
+          {{ cuyo.sex === 'hembra' ? '♀ Hembra' : '♂ Macho' }} · {{ cuyo.age_months | age }} · {{ cuyo.weight_g }} g
+        </p>
+        @if (cuyo.last_level) {
+          <ion-badge [color]="levels[cuyo.last_level].color">
+            Última dieta: {{ cuyo.last_score }} pts
+          </ion-badge>
+        }
+        <ion-button expand="block" class="ion-margin-top" (click)="evaluateDiet()">
+          <ion-icon slot="start" name="nutrition"></ion-icon>
+          Evaluar su dieta
+        </ion-button>
+      </div>
+
+      <!-- Historial de este cuyo -->
+      <h2 class="section-title">Historial de dietas</h2>
+      @if (evaluations().length > 0) {
+        <ion-list class="card-list">
+          @for (item of evaluations(); track item.id) {
+            <ion-item [routerLink]="['/tabs/historial', item.id]" detail>
+              <ion-label>
+                <h3>{{ levels[item.level].emoji }} {{ levels[item.level].title }}</h3>
+                <p>{{ item.created_at | date: 'dd/MM/yyyy HH:mm' }}</p>
+              </ion-label>
+              <ion-badge slot="end" [color]="levels[item.level].color">{{ item.score }} pts</ion-badge>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <p class="empty-state">Todavía no has evaluado su dieta.</p>
+      }
+
+      <ion-button expand="block" fill="outline" color="danger" class="ion-margin-top" (click)="confirmDelete()">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
+        Eliminar cuyo
+      </ion-button>
+    </div>
+  } @else {
+    <div class="center-spinner"><ion-spinner name="crescent"></ion-spinner></div>
+  }
+</ion-content>

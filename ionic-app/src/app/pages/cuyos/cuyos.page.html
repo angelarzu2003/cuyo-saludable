@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>🐹 Mis cuyos</ion-title>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Deslizar hacia abajo para recargar -->
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page">
+    @if (isLoading()) {
+      <div class="center-spinner"><ion-spinner name="crescent"></ion-spinner></div>
+    } @else {
+      @for (cuyo of cuyos(); track cuyo.id) {
+        <ion-list class="card-list">
+          <ion-item [routerLink]="['/tabs/cuyos', cuyo.id]" detail>
+            <span slot="start" class="avatar">🐹</span>
+            <ion-label>
+              <h2>{{ cuyo.name }}</h2>
+              <p>
+                {{ cuyo.sex === 'hembra' ? '♀ Hembra' : '♂ Macho' }} · {{ cuyo.age_months | age }} ·
+                {{ cuyo.weight_g }} g
+              </p>
+            </ion-label>
+            @if (cuyo.last_level) {
+              <ion-badge slot="end" [color]="levels[cuyo.last_level].color">{{ cuyo.last_score }} pts</ion-badge>
+            } @else {
+              <ion-note slot="end">Sin evaluar</ion-note>
+            }
+          </ion-item>
+        </ion-list>
+      } @empty {
+        <div class="empty-state">
+          <div class="emoji">🐹</div>
+          <p>Aún no registras ningún cuyo.<br />Toca <strong>+</strong> para agregar el primero.</p>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Botón flotante para crear (CREATE) -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button routerLink="/tabs/cuyos/nuevo" aria-label="Agregar cuyo">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

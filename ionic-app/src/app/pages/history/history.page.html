@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>🕒 Historial</ion-title>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page">
+    <!-- Evaluaciones hechas sin conexión (cola offline) -->
+    @if (sync.pending().length > 0) {
+      <h2 class="section-title">Pendientes de sincronizar</h2>
+      <ion-list class="card-list">
+        @for (item of sync.pending(); track item.local_id) {
+          <ion-item-sliding>
+            <ion-item>
+              <ion-icon slot="start" name="cloud-upload-outline" color="warning"></ion-icon>
+              <ion-label>
+                <h3>{{ item.cuyo_name }}</h3>
+                <p>{{ item.created_at | date: 'dd/MM/yyyy HH:mm' }} · se evaluará al reconectar</p>
+              </ion-label>
+              <ion-badge slot="end" color="warning">Pendiente</ion-badge>
+            </ion-item>
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="sync.discard(item.local_id)">Descartar</ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        }
+      </ion-list>
+      <ion-button expand="block" fill="outline" [disabled]="sync.isSyncing()" (click)="sync.sync()">
+        <ion-icon slot="start" name="sync-outline"></ion-icon>
+        Sincronizar ahora
+      </ion-button>
+    }
+
+    <!-- Evaluaciones guardadas en el servidor -->
+    <h2 class="section-title">Evaluaciones guardadas</h2>
+    @if (isLoading()) {
+      <div class="center-spinner"><ion-spinner name="crescent"></ion-spinner></div>
+    } @else if (evaluations().length > 0) {
+      <p class="hint">Desliza una evaluación hacia la izquierda para eliminarla.</p>
+      <ion-list class="card-list">
+        @for (item of evaluations(); track item.id) {
+          <ion-item-sliding>
+            <ion-item [routerLink]="['/tabs/historial', item.id]" detail>
+              <ion-label>
+                <h3>🐹 {{ item.cuyo_name }}</h3>
+                <p>{{ item.created_at | date: 'dd/MM/yyyy HH:mm' }}</p>
+              </ion-label>
+              <ion-badge slot="end" [color]="levels[item.level].color">{{ item.score }} pts</ion-badge>
+            </ion-item>
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="confirmDelete(item)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        }
+      </ion-list>
+    } @else {
+      <div class="empty-state">
+        <div class="emoji">🥗</div>
+        <p>Aún no hay evaluaciones.<br />Ve a la pestaña <strong>Evaluar</strong> para hacer la primera.</p>
+      </div>
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,116 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>🥗 Evaluar dieta</ion-title>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="page">
+    <!-- Elegir el cuyo -->
+    <section class="intro">
+      <p>
+        Arma el menú diario de tu cuyo sumando porciones de cada alimento y presiona
+        <strong>Evaluar</strong> para saber qué tan saludable es.
+      </p>
+
+      @if (cuyos().length > 0) {
+        <ion-select
+          label="¿Para qué cuyo es la dieta?"
+          labelPlacement="floating"
+          fill="outline"
+          interface="popover"
+          placeholder="Elige un cuyo"
+          [(ngModel)]="cuyoId"
+        >
+          @for (cuyo of cuyos(); track cuyo.id) {
+            <ion-select-option [value]="cuyo.id">🐹 {{ cuyo.name }}</ion-select-option>
+          }
+        </ion-select>
+      } @else {
+        <div class="card no-cuyos">
+          <span>Primero registra a tu cuyo.</span>
+          <ion-button size="small" routerLink="/tabs/cuyos/nuevo">Registrar cuyo</ion-button>
+        </div>
+      }
+    </section>
+
+    @if (isLoading()) {
+      <div class="center-spinner"><ion-spinner name="crescent"></ion-spinner></div>
+    }
+
+    <!-- Alimentos agrupados por sección -->
+    @for (section of sections(); track section.title) {
+      <section class="food-section" [class.danger]="section.isDanger">
+        <h2>{{ section.title }}</h2>
+        <p class="hint">{{ section.hint }}</p>
+
+        <div class="food-grid">
+          @for (food of section.foods; track food.id) {
+            <div class="food-card" [class.selected]="quantityOf(food) > 0">
+              <span class="emoji">{{ food.emoji }}</span>
+              <strong>{{ food.name }}</strong>
+              <small>{{ food.portion_size }}</small>
+
+              <div class="stepper">
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  aria-label="Quitar porción"
+                  [disabled]="quantityOf(food) === 0"
+                  (click)="changeQuantity(food, -1)"
+                >
+                  <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+                </ion-button>
+                <span class="quantity">{{ quantityOf(food) }}</span>
+                <ion-button fill="clear" size="small" aria-label="Agregar porción" (click)="changeQuantity(food, 1)">
+                  <ion-icon slot="icon-only" name="add-circle"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</ion-content>
+
+<!-- Barra inferior con el resumen del carrito -->
+<ion-footer>
+  <ion-toolbar>
+    <div class="cart-bar">
+      <span class="cart-total">🛒 <strong>{{ totalPortions() }}</strong> porciones</span>
+      <ion-button fill="clear" color="medium" [disabled]="totalPortions() === 0" (click)="clearCart()">
+        Vaciar
+      </ion-button>
+      <ion-button [disabled]="totalPortions() === 0 || isEvaluating()" (click)="evaluate()">
+        Evaluar
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
+
+<!-- Resultado de la evaluación -->
+<ion-modal [isOpen]="isResultOpen()" (didDismiss)="closeResult()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Resultado</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeResult()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      @if (result(); as evaluation) {
+        <app-diet-result [evaluation]="evaluation" />
+
+        <div class="ion-margin-top">
+          <ion-button expand="block" (click)="startOver()">Nueva evaluación</ion-button>
+          <ion-button expand="block" fill="outline" (click)="closeResult()">Ajustar esta dieta</ion-button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

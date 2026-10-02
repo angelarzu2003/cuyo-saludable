@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/cuyos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ cuyoId ? 'Editar cuyo' : 'Nuevo cuyo' }}</ion-title>
+  </ion-toolbar>
+  <app-offline-banner />
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form class="page card form" [formGroup]="form" (ngSubmit)="save()">
+    <ion-input
+      label="Nombre"
+      labelPlacement="floating"
+      fill="outline"
+      formControlName="name"
+      [maxlength]="50"
+      errorText="El nombre es obligatorio (máx. 50 caracteres)"
+    ></ion-input>
+
+    <div>
+      <p class="field-label">Sexo</p>
+      <ion-segment formControlName="sex">
+        <ion-segment-button value="hembra"><ion-label>♀ Hembra</ion-label></ion-segment-button>
+        <ion-segment-button value="macho"><ion-label>♂ Macho</ion-label></ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <ion-input
+      type="number"
+      label="Edad (meses)"
+      labelPlacement="floating"
+      fill="outline"
+      formControlName="age_months"
+      errorText="La edad debe estar entre 0 y 120 meses"
+    ></ion-input>
+
+    <ion-input
+      type="number"
+      label="Peso (gramos)"
+      labelPlacement="floating"
+      fill="outline"
+      formControlName="weight_g"
+      helperText="Un cuyo adulto suele pesar entre 700 y 1200 g"
+      errorText="El peso debe estar entre 50 y 3000 g"
+    ></ion-input>
+
+    <ion-button expand="block" type="submit" [disabled]="isSaving()">
+      {{ isSaving() ? 'Guardando...' : 'Guardar' }}
+    </ion-button>
+  </form>
+</ion-content>

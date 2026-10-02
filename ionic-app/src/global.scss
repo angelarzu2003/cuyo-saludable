@@ -36,3 +36,113 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 /* Modo oscuro desactivado: la app usa siempre el tema claro */
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/* ----------------------------------------------------------------------------
+ * Estilos compartidos por las páginas de la app
+ * ------------------------------------------------------------------------- */
+
+/* Contenedor centrado con ancho máximo (se ve bien en PC y celular) */
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Tarjeta blanca con bordes redondeados */
+.card {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--app-shadow);
+}
+
+/* Listas con apariencia de tarjeta */
+ion-list.card-list {
+  padding: 0;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: var(--app-shadow);
+}
+
+.section-title {
+  margin: 24px 0 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* Mensaje cuando una lista está vacía */
+.empty-state {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--ion-color-medium);
+
+  .emoji {
+    font-size: 3rem;
+  }
+}
+
+.center-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Avatar circular con emoji */
+.avatar {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  background: var(--app-primary-soft);
+  border-radius: 50%;
+
+  &.big {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 8px;
+    font-size: 3rem;
+  }
+}
+
+/* Ficha centrada (detalle de cuyo, perfil) */
+.profile {
+  text-align: center;
+
+  h1 {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 4px 0 12px;
+    color: var(--ion-color-medium-shade);
+  }
+}
+
+/* Formularios: campos apilados con separación */
+form.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-label {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium-shade);
+}
+
+/* Texto de ayuda pequeño y gris */
+.hint {
+  margin: 4px 0 12px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+/* Sin línea divisoria bajo el último elemento de una lista-tarjeta */
+ion-list.card-list > ion-item:last-child,
+ion-list.card-list > :last-child ion-item {
+  --border-width: 0;
+  --inner-border-width: 0;
+}
