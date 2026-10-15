@@ -3,6 +3,8 @@
 // Funciones compartidas por todos los endpoints
 // =========================================
 
+const API_VERSION = '1.1.0';
+
 // Cualquier error no controlado (ej. falla de MySQL) se responde como JSON 500,
 // sin mostrar detalles internos al cliente. El detalle queda en el log de PHP.
 set_exception_handler(function (Throwable $e): void {
@@ -45,7 +47,7 @@ function error_response(int $status, string $message): never
     json_response($status, ['success' => false, 'message' => $message]);
 }
 
-/** Lee el cuerpo JSON enviado por Axios como arreglo asociativo. */
+/** Lee el cuerpo JSON enviado por la app como arreglo asociativo. */
 function read_json_body(): array
 {
     $raw = file_get_contents('php://input');
@@ -77,7 +79,9 @@ function require_query_id(): int
 function bearer_token(): string
 {
     $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-    return str_replace('Bearer ', '', $headers['authorization'] ?? '');
+    // Respaldo: algunas configuraciones de Apache solo lo pasan como variable (ver .htaccess)
+    $header = $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    return str_replace('Bearer ', '', $header);
 }
 
 /**

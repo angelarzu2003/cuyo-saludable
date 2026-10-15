@@ -15,11 +15,13 @@ import {
   nutrition,
   paw,
   personCircle,
+  pulseOutline,
   removeCircleOutline,
   syncOutline,
   time,
   trashOutline,
 } from 'ionicons/icons';
+import { LoadingService } from './core/loading.service';
 import { SyncService } from './core/sync.service';
 
 @Component({
@@ -29,12 +31,14 @@ import { SyncService } from './core/sync.service';
   standalone: false,
 })
 export class AppComponent {
+  readonly loading = inject(LoadingService);
+
   constructor() {
     // Íconos incluidos en el bundle: así se ven aunque no haya conexión
     addIcons({
       add, addCircle, alertCircle, checkmarkCircle, closeCircle, cloudDoneOutline, cloudOfflineOutline,
-      cloudUploadOutline, createOutline, logOutOutline, nutrition, paw, personCircle, removeCircleOutline,
-      syncOutline, time, trashOutline,
+      cloudUploadOutline, createOutline, logOutOutline, nutrition, paw, personCircle, pulseOutline,
+      removeCircleOutline, syncOutline, time, trashOutline,
     });
 
     // Al abrir la app se intenta enviar lo que haya quedado pendiente sin conexión

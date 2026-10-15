@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { ApiService, isNetworkError } from './api.service';
+import { ENDPOINTS } from './api-endpoints';
+import { isNetworkError } from './api-error';
+import { ApiService } from './api.service';
 import { NotifyService } from './notify.service';
 import { SessionService } from './session.service';
 import { StorageService } from './storage.service';
@@ -63,7 +65,7 @@ export class SyncService {
     try {
       for (const item of this.pending()) {
         try {
-          await this.api.post('/evaluations.php', { cuyo_id: item.cuyo_id, items: item.items });
+          await this.api.post(ENDPOINTS.evaluations, { cuyo_id: item.cuyo_id, items: item.items });
           syncedCount++;
         } catch (error) {
           // Sigue sin conexión: se detiene y se reintentará más tarde

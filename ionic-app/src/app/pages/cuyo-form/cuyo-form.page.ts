@@ -21,6 +21,7 @@ export class CuyoFormPage implements OnInit {
 
   /** id del cuyo a editar; null cuando se está creando uno nuevo. */
   readonly cuyoId = Number(this.route.snapshot.paramMap.get('id')) || null;
+  isLoading = signal(this.cuyoId !== null); // solo al editar hay que traer los datos
   isSaving = signal(false);
 
   // Mismas reglas que valida el backend (api/cuyos.php)
@@ -41,6 +42,8 @@ export class CuyoFormPage implements OnInit {
     } catch (error) {
       await this.notify.error(error);
       this.router.navigateByUrl('/tabs/cuyos', { replaceUrl: true });
+    } finally {
+      this.isLoading.set(false);
     }
   }
 

@@ -1,0 +1,1 @@
+import {bv as n$1}from'./main-DNVC5IXG.js';var n=()=>{if(n$1!==void 0)return n$1.Capacitor};export{n};

@@ -2,7 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular/lazy';
-import { ApiError } from '../../core/api.service';
+import { ApiError } from '../../core/api-error';
+import { LoadingService } from '../../core/loading.service';
 import { NotifyService } from '../../core/notify.service';
 import { CuyoService } from '../../services/cuyo.service';
 import { DietService } from '../../services/diet.service';
@@ -21,6 +22,7 @@ export class CuyoDetailPage {
   private cuyoService = inject(CuyoService);
   private dietService = inject(DietService);
   private notify = inject(NotifyService);
+  private loading = inject(LoadingService);
   private alertController = inject(AlertController);
   private router = inject(Router);
 
@@ -61,7 +63,8 @@ export class CuyoDetailPage {
       message: 'También se eliminarán todas sus evaluaciones.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Eliminar', role: 'destructive', handler: () => this.delete() },
+        // Sin esperar la promesa: la alerta se cierra y se ve el aviso "Eliminando..."
+        { text: 'Eliminar', role: 'destructive', handler: () => void this.delete() },
       ],
     });
     await alert.present();
@@ -69,7 +72,7 @@ export class CuyoDetailPage {
 
   private async delete() {
     try {
-      await this.cuyoService.remove(this.id);
+      await this.loading.run('Eliminando cuyo...', () => this.cuyoService.remove(this.id));
       await this.notify.success('Cuyo eliminado');
       this.router.navigateByUrl('/tabs/cuyos', { replaceUrl: true });
     } catch (error) {

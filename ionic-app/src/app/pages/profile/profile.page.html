@@ -49,7 +49,15 @@
         helperText="Ej: http://192.168.1.50/proyecto/api (la IP de la PC con XAMPP)"
         [(ngModel)]="serverUrl"
       ></ion-input>
-      <ion-button expand="block" class="ion-margin-top" (click)="saveServerUrl()">Guardar servidor</ion-button>
+      <ion-button expand="block" fill="outline" class="ion-margin-top" [disabled]="isTesting()" (click)="testServerUrl()">
+        @if (isTesting()) {
+          <ion-spinner slot="start" name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon slot="start" name="pulse-outline"></ion-icon>
+        }
+        {{ isTesting() ? 'Probando...' : 'Probar conexión' }}
+      </ion-button>
+      <ion-button expand="block" (click)="saveServerUrl()">Guardar servidor</ion-button>
     </div>
 
     <ion-button expand="block" color="danger" (click)="confirmLogout()">

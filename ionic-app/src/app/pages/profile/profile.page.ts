@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular/lazy';
@@ -25,14 +25,28 @@ export class ProfilePage {
   readonly user = inject(SessionService).user;
   readonly connectivity = inject(ConnectivityService);
   readonly sync = inject(SyncService);
-  readonly appVersion = '1.0.0';
+  readonly appVersion = '1.2.0';
 
   serverUrl = this.api.baseUrl();
+  isTesting = signal(false);
 
   async saveServerUrl() {
     this.api.setBaseUrl(this.serverUrl);
     this.serverUrl = this.api.baseUrl();
     await this.notify.success('Servidor guardado');
+  }
+
+  /** Prueba la URL escrita (GET /health) antes de guardarla. */
+  async testServerUrl() {
+    this.isTesting.set(true);
+    try {
+      const health = await this.api.checkHealth(this.serverUrl);
+      await this.notify.success(`✅ ${health.service} v${health.version} · base de datos ${health.database}`);
+    } catch {
+      await this.notify.error(null, 'La API no responde en esa URL. Revisa la IP y que XAMPP esté encendido.');
+    } finally {
+      this.isTesting.set(false);
+    }
   }
 
   async confirmLogout() {

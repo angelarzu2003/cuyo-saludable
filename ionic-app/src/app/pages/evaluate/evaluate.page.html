@@ -84,7 +84,10 @@
         Vaciar
       </ion-button>
       <ion-button [disabled]="totalPortions() === 0 || isEvaluating()" (click)="evaluate()">
-        Evaluar
+        @if (isEvaluating()) {
+          <ion-spinner slot="start" name="crescent"></ion-spinner>
+        }
+        {{ isEvaluating() ? 'Evaluando...' : 'Evaluar' }}
       </ion-button>
     </div>
   </ion-toolbar>

@@ -1,13 +1,14 @@
 <?php
 // =========================================
-// Endpoint: /api/cuyos.php  -> CRUD de los cuyos del usuario
+// Endpoint: /api/cuyos  -> CRUD de los cuyos del usuario
 // Requiere header: Authorization: Bearer <token>
 //
-// GET            -> Lista de cuyos (con el puntaje de su última evaluación)
-// GET    ?id=5   -> Un cuyo
-// POST           -> Crea     Body: { "name", "sex", "age_months", "weight_g" }
-// PUT    ?id=5   -> Actualiza (mismo body)
-// DELETE ?id=5   -> Elimina el cuyo y sus evaluaciones
+// GET    /api/cuyos     -> Lista de cuyos (con el puntaje de su última evaluación)
+// GET    /api/cuyos/5   -> Un cuyo
+// POST   /api/cuyos     -> Crea     Body: { "name", "sex", "age_months", "weight_g" }
+// PUT    /api/cuyos/5   -> Actualiza (mismo body)
+// DELETE /api/cuyos/5   -> Elimina el cuyo y sus evaluaciones
+// (/api/cuyos/5 lo traduce .htaccess a cuyos.php?id=5)
 // =========================================
 
 require_once __DIR__ . '/helpers.php';

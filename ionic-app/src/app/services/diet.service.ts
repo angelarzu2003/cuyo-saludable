@@ -1,28 +1,38 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService, isNetworkError } from '../core/api.service';
+import { ENDPOINTS } from '../core/api-endpoints';
+import { isNetworkError } from '../core/api-error';
+import { ApiService } from '../core/api.service';
 import { SyncService } from '../core/sync.service';
-import { EvaluationDetail, EvaluationRequest, EvaluationSummary, Food } from '../interfaces';
+import {
+  EvaluationDetail,
+  EvaluationListResponse,
+  EvaluationRequest,
+  EvaluationResponse,
+  EvaluationSummary,
+  Food,
+  FoodListResponse,
+} from '../interfaces';
 
-/** Alimentos y evaluaciones de dieta (api/foods.php y api/evaluations.php). */
+/** Alimentos y evaluaciones de dieta (/api/foods y /api/evaluations). */
 @Injectable({ providedIn: 'root' })
 export class DietService {
   private api = inject(ApiService);
   private sync = inject(SyncService);
 
   async getFoods(): Promise<Food[]> {
-    const data = await this.api.getCached<{ foods: Food[] }>('/foods.php');
+    const data = await this.api.getCached<FoodListResponse>(ENDPOINTS.foods);
     return data.foods;
   }
 
   /** Historial de evaluaciones; si se pasa cuyoId, solo las de ese cuyo. */
   async getHistory(cuyoId?: number): Promise<EvaluationSummary[]> {
-    const url = cuyoId ? `/evaluations.php?cuyo_id=${cuyoId}` : '/evaluations.php';
-    const data = await this.api.getCached<{ evaluations: EvaluationSummary[] }>(url);
+    const path = cuyoId ? ENDPOINTS.cuyoEvaluations(cuyoId) : ENDPOINTS.evaluations;
+    const data = await this.api.getCached<EvaluationListResponse>(path);
     return data.evaluations;
   }
 
   async getEvaluation(id: number): Promise<EvaluationDetail> {
-    const data = await this.api.getCached<{ evaluation: EvaluationDetail }>(`/evaluations.php?id=${id}`);
+    const data = await this.api.getCached<EvaluationResponse>(ENDPOINTS.evaluation(id));
     return data.evaluation;
   }
 
@@ -32,7 +42,7 @@ export class DietService {
    */
   async evaluate(request: EvaluationRequest, cuyoName: string): Promise<EvaluationDetail | null> {
     try {
-      const data = await this.api.post<{ evaluation: EvaluationDetail }>('/evaluations.php', request);
+      const data = await this.api.post<EvaluationResponse>(ENDPOINTS.evaluations, request);
       return data.evaluation;
     } catch (error) {
       if (isNetworkError(error)) {
@@ -44,6 +54,6 @@ export class DietService {
   }
 
   async deleteEvaluation(id: number): Promise<void> {
-    await this.api.delete(`/evaluations.php?id=${id}`);
+    await this.api.delete(ENDPOINTS.evaluation(id));
   }
 }

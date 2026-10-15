@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ToastController } from '@ionic/angular/lazy';
-import { ApiError } from './api.service';
+import { ApiError } from './api-error';
 
 /** Mensajes cortos (toasts) para informar al usuario. */
 @Injectable({ providedIn: 'root' })

@@ -1,6 +1,6 @@
 <?php
 // =========================================
-// Endpoint: GET /api/foods.php
+// Endpoint: GET /api/foods  (foods.php)
 // Devuelve el catálogo de alimentos para armar el formulario.
 // Requiere header: Authorization: Bearer <token>
 // =========================================

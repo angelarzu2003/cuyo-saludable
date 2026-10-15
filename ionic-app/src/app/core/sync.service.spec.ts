@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { ApiError, ApiService } from './api.service';
+import { ApiError } from './api-error';
+import { ApiService } from './api.service';
 import { NotifyService } from './notify.service';
 import { SessionService } from './session.service';
 import { SyncService } from './sync.service';
@@ -38,7 +39,7 @@ describe('SyncService (cola offline)', () => {
 
     await sync.sync();
 
-    expect(api.post).toHaveBeenCalledWith('/evaluations.php', request);
+    expect(api.post).toHaveBeenCalledWith('/evaluations', request);
     expect(sync.pending().length).toBe(0);
     expect(notify.success).toHaveBeenCalled();
   });

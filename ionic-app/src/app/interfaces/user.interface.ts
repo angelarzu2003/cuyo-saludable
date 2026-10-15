@@ -5,9 +5,8 @@ export interface User {
   email: string;
 }
 
-/** Respuesta de api/login.php. */
-export interface LoginResponse {
-  token: string;
-  expires_at: string;
-  user: User;
+/** Cuerpo del POST /auth/login. */
+export interface LoginRequest {
+  email: string;
+  password: string;
 }

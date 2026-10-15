@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { AlertController, IonicModule, RefresherCustomEvent } from '@ionic/angular/lazy';
+import { LoadingService } from '../../core/loading.service';
 import { NotifyService } from '../../core/notify.service';
 import { SyncService } from '../../core/sync.service';
 import { DietService } from '../../services/diet.service';
@@ -19,6 +20,7 @@ import { HEALTH_LEVELS } from '../../shared/health-levels';
 export class HistoryPage {
   private dietService = inject(DietService);
   private notify = inject(NotifyService);
+  private loading = inject(LoadingService);
   private alertController = inject(AlertController);
   readonly sync = inject(SyncService);
 
@@ -58,7 +60,8 @@ export class HistoryPage {
       message: `Dieta de ${evaluation.cuyo_name} (${evaluation.score} pts).`,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Eliminar', role: 'destructive', handler: () => this.delete(evaluation.id) },
+        // Sin esperar la promesa: la alerta se cierra y se ve el aviso "Eliminando..."
+        { text: 'Eliminar', role: 'destructive', handler: () => void this.delete(evaluation.id) },
       ],
     });
     await alert.present();
@@ -66,7 +69,7 @@ export class HistoryPage {
 
   private async delete(id: number) {
     try {
-      await this.dietService.deleteEvaluation(id);
+      await this.loading.run('Eliminando evaluación...', () => this.dietService.deleteEvaluation(id));
       this.evaluations.update((list) => list.filter((item) => item.id !== id));
       await this.notify.success('Evaluación eliminada');
     } catch (error) {

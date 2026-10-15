@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular/lazy';
+import { LoadingService } from '../../core/loading.service';
 import { NotifyService } from '../../core/notify.service';
 import { DietService } from '../../services/diet.service';
 import { DietResultComponent } from '../../shared/diet-result.component';
@@ -17,6 +18,7 @@ import { EvaluationDetail } from '../../interfaces';
 export class EvaluationDetailPage implements OnInit {
   private dietService = inject(DietService);
   private notify = inject(NotifyService);
+  private loading = inject(LoadingService);
   private alertController = inject(AlertController);
   private router = inject(Router);
 
@@ -38,7 +40,8 @@ export class EvaluationDetailPage implements OnInit {
       message: 'Esta acción no se puede deshacer.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Eliminar', role: 'destructive', handler: () => this.delete() },
+        // Sin esperar la promesa: la alerta se cierra y se ve el aviso "Eliminando..."
+        { text: 'Eliminar', role: 'destructive', handler: () => void this.delete() },
       ],
     });
     await alert.present();
@@ -46,7 +49,7 @@ export class EvaluationDetailPage implements OnInit {
 
   private async delete() {
     try {
-      await this.dietService.deleteEvaluation(this.id);
+      await this.loading.run('Eliminando evaluación...', () => this.dietService.deleteEvaluation(this.id));
       await this.notify.success('Evaluación eliminada');
       this.router.navigateByUrl('/tabs/historial', { replaceUrl: true });
     } catch (error) {

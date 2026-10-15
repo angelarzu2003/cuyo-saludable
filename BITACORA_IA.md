@@ -2,10 +2,10 @@
 
 | Campo            | Detalle                                                                 |
 |------------------|-------------------------------------------------------------------------|
-| Proyecto         | Cuyo Saludable v1.0.0 (Ionic + Angular, PHP, MySQL)                     |
+| Proyecto         | Cuyo Saludable v1.2.0 (Ionic + Angular, PHP, MySQL)                     |
 | Estudiante       | Angel Arzu Herrera Sierra                                               |
 | Herramienta de IA| **Claude Code** (modelo Claude Opus 5.5, de Anthropic), extensión de VS Code |
-| Periodo          | 23/09/2026 – 01/10/2026                                                 |
+| Periodo          | 23/09/2026 – 15/10/2026                                                 |
 
 ## Metodología de trabajo
 
@@ -145,6 +145,131 @@ Pruebas unitarias: **4 archivos, 11 pruebas, todas aprobadas**.
 ### Verificación
 - Búsqueda: no queda ninguna `interface` ni `type` fuera de `interfaces/`.
 - Compilación correcta, 11/11 pruebas unitarias y prueba de punta a punta completa sin errores.
+
+---
+
+## Sesión 5 — 10/10/2026 · Cliente móvil conectado a un servicio web (Unidad II)
+
+### Petición del estudiante (prompt original, textual)
+> *"Convertir la aplicación de la Unidad I (esta) en un cliente móvil conectado a un servicio web. Se debe entregar modificado el proyecto con lo siguiente: Diagrama Cliente → API → Base de datos. Lista de endpoints requeridos. Métodos HTTP utilizados. Modelo JSON de intercambio de información. Servicio Angular preparado para consumir la API. Explicación de la arquitectura propuesta. Evidencia de uso de IA para analizar o mejorar la arquitectura."*
+
+### Prompts por etapa
+El trabajo se dividió en pasos. Cada prompt resume lo que se le pidió a la IA en ese paso:
+
+| # | Etapa | Prompt |
+|---|-------|--------|
+| 1 | Análisis | *"Analizando la estructura actual del proyecto (api/, ionic-app/src/app/core, services, interfaces), dime qué partes ya funcionan como cliente → API → BD y qué le falta para ser un servicio web REST bien definido."* |
+| 2 | Diagnóstico del cliente | *"Revisa `api.service.ts`: ¿es la forma recomendada en Angular de consumir una API? Propón cómo separar el token y el manejo de errores del código de las peticiones."* |
+| 3 | Mejora de la API | *"Mejora las rutas de la API para que sean REST (`/cuyos/5` en lugar de `cuyos.php?id=5`) sin romper las URLs que ya existen ni el despliegue en XAMPP."* |
+| 4 | Nuevo endpoint | *"Agrega un endpoint `GET /health` sin token que confirme que la API y la base de datos responden, y úsalo en Perfil para probar la URL del servidor."* |
+| 5 | Seguridad | *"Revisa si algún archivo interno de la API (config.php, helpers.php) se puede abrir desde el navegador y bloquéalo. Haz que las rutas que no existen respondan 404 en JSON."* |
+| 6 | Servicio Angular | *"Edita el ApiService para usar HttpClient en lugar de Axios, con un interceptor que agregue el token y otro que convierta los errores en ApiError. Las páginas no deben cambiar."* |
+| 7 | Modelo JSON | *"Define en `interfaces/` el formato de todas las respuestas de la API (`ApiResponse<T>`) y un archivo con todas las rutas (`ENDPOINTS`)."* |
+| 8 | Pruebas | *"Escribe pruebas unitarias del cliente HTTP con HttpTestingController (token, 400, sin conexión, 401 y caché) y prueba todos los endpoints con curl, incluidos los errores."* |
+| 9 | Documentación | *"Con lo anterior, redacta ARQUITECTURA.md: diagrama Cliente → API → BD, lista de endpoints, métodos HTTP, modelo JSON con ejemplos reales, servicio Angular y explicación de la arquitectura."* |
+
+### Lo que encontró la IA en el análisis (etapas 1 y 2)
+| Hallazgo | Riesgo / problema | Mejora aplicada |
+|---|---|---|
+| La app **ya** era cliente → API PHP → MySQL, pero las URLs eran nombres de archivo (`cuyos.php?id=5`) | La API dependía de cómo estaban guardados los archivos, no de los recursos | Rutas REST en `api/.htaccess`: `/cuyos/5`, `/cuyos/5/evaluations`, `/auth/login`... |
+| El cliente usaba **Axios**, una librería externa, y el token y los errores estaban dentro de `ApiService` | No es la forma recomendada en Angular, y cada responsabilidad nueva haría crecer el mismo archivo | `HttpClient` + interceptores `authInterceptor` y `apiErrorInterceptor`; se quitó la dependencia `axios` |
+| Las rutas estaban escritas a mano en cada servicio (`'/cuyos.php?id=' + id`) | Un cambio de ruta obligaba a buscarla en varios archivos | `core/api-endpoints.ts` con todas las rutas |
+| El formato de las respuestas solo estaba "en la cabeza" (`{ cuyos: Cuyo[] }` escrito en cada llamada) | No había un contrato documentado | `ApiResponse<T>` y un tipo por respuesta en `interfaces/api.interface.ts` |
+| `config.php` y `helpers.php` se podían pedir por URL | Exponer archivos internos no es buena práctica | `403` con `<FilesMatch>` en `.htaccess` |
+| Una ruta inexistente devolvía la página HTML 404 de Apache | El cliente espera siempre JSON | `not_found.php` → `404` en JSON |
+| No había forma de comprobar desde el celular si la URL del servidor era correcta | En el APK, una IP mal escrita solo se descubría al fallar el login | `GET /health` + botón **Probar conexión** en Perfil |
+
+### Decisiones técnicas
+| Decisión | Motivo |
+|---|---|
+| Rutas REST con `mod_rewrite` en lugar de un *router* PHP nuevo | Cambio mínimo: los endpoints PHP no se reescriben, XAMPP ya trae `mod_rewrite` y las URLs antiguas siguen funcionando |
+| `ApiService` sigue devolviendo `Promise` (`firstValueFrom`) | Las páginas ya usan `async/await`; así el cambio de Axios a HttpClient no tocó ninguna página |
+| El *timeout* (8 s) se aplica en el interceptor | Todas las peticiones lo tienen, sin repetirlo en cada servicio |
+| `GET /cuyos/{id}/evaluations` solo acepta GET | Es una vista del historial; las evaluaciones se crean siempre en `POST /evaluations` |
+| La documentación usa respuestas **reales** de la API | Los ejemplos JSON se copiaron de `curl`, no se inventaron |
+
+### Problemas encontrados y cómo se resolvieron
+| Problema | Cómo se detectó | Solución |
+|---|---|---|
+| XAMPP estaba apagado, así que no se podía probar la API | `curl` sin respuesta | Se encendieron Apache y MySQL antes de cambiar nada |
+| Error de compilación del test: `'error' is of type 'unknown'` (TS18046) | `ng test` | Indicar el tipo del error capturado (`as ApiError`) |
+| En la prueba sin conexión, la consola muestra `504 (Gateway Timeout)` | Prueba de punta a punta | Es lo esperado: lo genera el Service Worker sin red, y el interceptor lo trata como `'network'` |
+
+### Verificación
+**API (`curl`):** las 14 rutas REST respondieron como se esperaba: `200`/`201` en éxito, `400` validación, `401` sin token o tras logout, `404` cuyo inexistente y ruta inexistente, `405` con `PATCH`, `403` para `config.php` y `helpers.php`. Las URLs antiguas (`cuyos.php?id=1`) siguen respondiendo `200`, y el *preflight* `OPTIONS` devuelve las cabeceras CORS.
+
+**Pruebas unitarias:** 5 archivos, **17 pruebas aprobadas** (11 anteriores y 6 nuevas de `api.service.spec.ts`). `ng lint` sin errores. `ng build` regeneró `app/`.
+
+**Prueba de punta a punta (Playwright + Edge, contra XAMPP):**
+```
+✔ login + lista de cuyos: Coco, Cui, Pelusa
+✔ CREATE -> ¡Copito fue registrado!
+✔ detalle del cuyo 14
+✔ Probar conexión -> ✅ Cuyo Saludable API v1.1.0 · base de datos ok
+✔ historial cargado
+✔ offline: lista desde caché: 3 cuyos
+✔ DELETE -> Cuyo eliminado
+✔ logout -> /login
+
+Llamadas a la API:
+  POST /api/auth/login
+  GET /api/cuyos
+  POST /api/cuyos
+  GET /api/cuyos/14
+  GET /api/cuyos/14/evaluations
+  GET /api/health
+  GET /api/evaluations
+  DELETE /api/cuyos/14
+  POST /api/auth/logout
+```
+La lista confirma que la app ya solo usa las rutas REST nuevas.
+
+### Resultado
+Documento [`ARQUITECTURA.md`](ARQUITECTURA.md) con los 7 entregables de la Unidad II, y la versión **v1.1.0** del proyecto.
+
+---
+
+## Sesión 6 — 14/10/2026 y 15/10/2026 · Conectar la app Ionic con una API REST (evidencias)
+
+### Petición del estudiante (prompts textuales)
+> *"Si quiero hacer esto: Conectar la aplicación Ionic con una API REST. Entregarán: Petición GET. Petición POST. PUT/PATCH. DELETE. Servicios Angular. Manejo de respuestas y errores. Loading durante las solicitudes. Capturas o video del funcionamiento. Código subido a Git. ¿Qué falta por hacer?"*
+
+> *"Haz los videos y/o capturas del funcionamiento, puedes instalar lo que ocupes para hacerlo de forma autónoma. Además haz las cosas que faltan."*
+
+### Análisis de la IA: qué faltaba
+| Requisito | Estado encontrado |
+|---|---|
+| GET, POST, PUT, DELETE, servicios, errores | Ya cumplidos desde la v1.1 |
+| Loading | **Incompleto:** los DELETE, la carga del formulario de edición y "Probar conexión" no tenían indicador |
+| Capturas o video | **Faltaban:** no había ninguno en el proyecto |
+| Git | **Pendiente:** los cambios de la v1.1 no tenían commit y el repositorio no tiene remoto |
+
+### Qué hizo la IA
+1. **Loading en dos niveles:**
+   - `loadingInterceptor` + `LoadingService`: una barra de progreso global que aparece en **todas** las peticiones.
+   - `LoadingService.run('Eliminando...')` en los 3 DELETE.
+   - Spinner al cargar los datos para editar, y botones "Evaluando..." y "Probando...".
+2. **Prueba unitaria nueva:** la barra se enciende durante la petición y se apaga aunque falle (18 pruebas en total).
+3. **Capturas y video automáticos:** script `docs/evidencias/generar-evidencias.mjs` (Playwright + Edge, contra XAMPP), con 27 capturas y un video MP4 de 1 min 19 s.
+   - Agrega un **panel inferior** con cada petición (método, ruta, código HTTP y JSON).
+   - Agrega un **retraso de 1.2 s** para que el loading se alcance a ver.
+   - Se instalaron `playwright-core` y `ffmpeg-static` en una carpeta temporal, sin tocar las dependencias del proyecto.
+4. **Documento** [`EVIDENCIAS.md`](EVIDENCIAS.md): cada requisito con su código y sus capturas.
+
+### Problemas encontrados al revisar las capturas
+La IA revisó cada captura antes de darla por buena:
+
+| Problema | Cómo se detectó | Solución |
+|---|---|---|
+| **Al eliminar, la alerta de confirmación se quedaba abierta** detrás de "Eliminando..." | Captura 19 | Era un detalle real de la app: Ionic espera la promesa del botón antes de cerrar la alerta. Se cambió a `handler: () => void this.delete()` |
+| La captura del PUT mostraba los datos **viejos** (520 g) | Captura 13 | El script tomaba la foto antes de que el detalle recargara; ahora espera a ver "610 g" |
+| La captura "sin conexión" no mostraba el toast | Captura 22 y un script de diagnóstico | El script recargaba la página y cortaba la red; el componente `ion-toast` se descarga la primera vez que se usa y sin red no pudo cargarse. En uso real no pasa: el Service Worker o el APK ya tienen esos archivos (ver Sesión 3). Se cambió el script para navegar **dentro** de la app, como un usuario |
+| Ionic deja páginas ocultas en su pila y el script encontraba la copia oculta | Error de Playwright | Filtrar solo los elementos visibles |
+| Faltaba el `ffmpeg` de Playwright para grabar video | Mensaje de error | `playwright install ffmpeg` |
+
+### Verificación
+- `ng test`: **5 archivos, 18 pruebas aprobadas**. `ng lint` sin errores. `ng build` regeneró `app/`.
+- Recorrido automatizado de **27 pasos** completo, con **0 errores de JavaScript** en la página.
 
 ---
 

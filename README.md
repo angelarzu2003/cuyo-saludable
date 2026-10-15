@@ -1,13 +1,19 @@
-# 🐹 Cuyo Saludable — v1.0.0
+# 🐹 Cuyo Saludable — v1.2.0
 
 Aplicación móvil/web hecha con **Ionic + Angular** para registrar a tus cuyos (cobayas) y evaluar si su dieta diaria es saludable.
 El usuario arma el menú del día como un "carrito" de alimentos, y el backend calcula un **puntaje de 0 a 100** con recomendaciones.
 Cada evaluación se guarda en una base de datos MySQL. La app sigue funcionando **sin conexión**.
 
+> 🏗️ **Unidad II, cliente móvil + servicio web:** el diagrama Cliente → API → BD, los endpoints, los métodos HTTP, el modelo JSON, el servicio Angular
+> y la explicación de la arquitectura están en **[`ARQUITECTURA.md`](ARQUITECTURA.md)**. La evidencia de uso de IA está en la [bitácora, Sesión 5](BITACORA_IA.md).
+>
+> 📸 **Conexión con la API REST:** GET, POST, PUT y DELETE, servicios Angular, manejo de errores, loading, **27 capturas y un video**
+> en **[`EVIDENCIAS.md`](EVIDENCIAS.md)**.
+
 | Capa       | Tecnología                                                            |
 |------------|-----------------------------------------------------------------------|
-| Frontend   | Ionic 9 · Angular 22 (componentes standalone + signals) · Axios       |
-| Backend    | PHP 8 (API REST en JSON) · PDO                                        |
+| Frontend   | Ionic 9 · Angular 22 (componentes standalone + signals) · HttpClient  |
+| Backend    | PHP 8 (API REST en JSON, rutas con mod_rewrite) · PDO                 |
 | Base datos | MySQL / MariaDB (XAMPP)                                               |
 | Offline    | Caché local + cola de sincronización + Service Worker                 |
 | Móvil      | Capacitor (Android)                                                   |
@@ -30,6 +36,8 @@ Cada evaluación se guarda en una base de datos MySQL. La app sigue funcionando 
 | APK o ejecución demostrable   | Ejecución en XAMPP (`http://localhost/proyecto`) y configuración de Capacitor lista para el APK                      |
 | README.md                     | Este archivo                                                                                                        |
 | Bitácora de desarrollo con IA | [`BITACORA_IA.md`](BITACORA_IA.md)                                                                                  |
+| **Unidad II:** cliente móvil conectado a un servicio web | [`ARQUITECTURA.md`](ARQUITECTURA.md): diagrama, endpoints, métodos HTTP, modelo JSON, servicio Angular y arquitectura |
+| **Conectar Ionic con una API REST:** GET, POST, PUT, DELETE, servicios, errores, loading, capturas/video | [`EVIDENCIAS.md`](EVIDENCIAS.md) · capturas en `docs/evidencias/` · tag `v1.2.0` |
 
 ---
 
@@ -50,7 +58,7 @@ La app ya viene **compilada** en la carpeta `app/`. Apache sirve tanto el fronte
 |--------------------------------------|----------------------------|
 | `http://localhost/proyecto`          | Redirige a la app          |
 | `http://localhost/proyecto/app/`     | Frontend compilado (Ionic) |
-| `http://localhost/proyecto/api/...`  | API PHP                    |
+| `http://localhost/proyecto/api/...`  | API REST (ej. `/api/health`) |
 
 ---
 
@@ -60,13 +68,19 @@ La app ya viene **compilada** en la carpeta `app/`. Apache sirve tanto el fronte
 proyecto/
 ├── index.php                      # Redirige /proyecto -> /proyecto/app/
 ├── app/                           # Frontend COMPILADO (lo sirve Apache). Se genera con "npm run build"
+├── ARQUITECTURA.md                # Unidad II: cliente móvil ↔ servicio web
+├── EVIDENCIAS.md                  # GET/POST/PUT/DELETE, errores y loading, con capturas
+├── docs/evidencias/               # 27 capturas, video .mp4 y el script que los genera
 ├── api/                           # Backend PHP (API REST)
+│   ├── .htaccess                  # Rutas REST (/cuyos/5 -> cuyos.php?id=5) y bloqueo de archivos internos
 │   ├── config.php                 # Conexión PDO a MySQL
 │   ├── helpers.php                # CORS, respuestas JSON, errores, validación de token
 │   ├── login.php / logout.php     # Sesión
 │   ├── cuyos.php                  # CRUD de cuyos
 │   ├── foods.php                  # Catálogo de alimentos
 │   ├── evaluations.php            # Crear / listar / detalle / eliminar evaluaciones
+│   ├── health.php                 # Estado del servicio y de la BD
+│   ├── not_found.php              # 404 en JSON para rutas inexistentes
 │   └── diet_evaluator.php         # Reglas de nutrición (cálculo del puntaje)
 ├── sql/cuyo_app.sql               # Esquema + datos iniciales
 ├── BITACORA_IA.md                 # Bitácora de desarrollo asistido por IA
@@ -76,7 +90,13 @@ proyecto/
     └── src/app/
         ├── app-routing.module.ts  # Mapa completo de navegación
         ├── core/                  # Infraestructura: API, sesión, errores, offline
-        │   ├── api.service.ts         # Axios + ApiError + caché
+        │   ├── api.service.ts         # Cliente HTTP (Angular HttpClient) + caché offline
+        │   ├── api-endpoints.ts       # Todas las rutas de la API (ENDPOINTS)
+        │   ├── auth.interceptor.ts    # Agrega el token Bearer
+        │   ├── api-error.interceptor.ts # Timeout, errores -> ApiError, sesión expirada
+        │   ├── api-error.ts           # Clase ApiError
+        │   ├── loading.interceptor.ts # Cuenta las peticiones en curso (barra de carga)
+        │   ├── loading.service.ts     # Barra de carga global + aviso "Eliminando..."
         │   ├── sync.service.ts        # Cola offline y sincronización
         │   ├── connectivity.service.ts
         │   ├── storage.service.ts     # Persistencia local (localStorage)
@@ -86,11 +106,11 @@ proyecto/
         │   └── auth.guard.ts
         ├── interfaces/            # TODAS las interfaces y tipos de datos
         │   ├── index.ts               # Exporta todo: import { Cuyo } from '../interfaces'
-        │   ├── user.interface.ts      # User, LoginResponse
+        │   ├── user.interface.ts      # User, LoginRequest
         │   ├── cuyo.interface.ts      # Cuyo, CuyoForm, CuyoSex
         │   ├── food.interface.ts      # Food, FoodCategory, FoodSection
         │   ├── evaluation.interface.ts# EvaluationSummary, EvaluationDetail, PendingEvaluation...
-        │   └── api.interface.ts       # ApiErrorKind
+        │   └── api.interface.ts       # Modelo JSON: ApiResponse<T>, LoginResponse, CuyoResponse...
         ├── services/              # auth, cuyo, diet (lógica de negocio del frontend)
         ├── shared/                # Reutilizables: resultado, aviso offline, pipe de edad, niveles de salud
         └── pages/                 # login, tabs, cuyos, cuyo-form, cuyo-detail,
@@ -165,25 +185,28 @@ Las llaves foráneas usan `ON DELETE CASCADE`: al eliminar un cuyo, también se 
 
 ## 🔌 API REST
 
-Todas las rutas, excepto `login.php`, requieren el header `Authorization: Bearer <token>`.
+Todas las rutas, excepto `health` y `auth/login`, requieren el header `Authorization: Bearer <token>`.
 Las respuestas siempre son JSON: `{ "success": true, ... }` o `{ "success": false, "message": "..." }`.
+Las URLs antiguas (`cuyos.php?id=1`) siguen funcionando. Detalle completo y ejemplos JSON: [`ARQUITECTURA.md`](ARQUITECTURA.md).
 
 | Método | Ruta                               | Descripción                                   |
 |--------|------------------------------------|-----------------------------------------------|
-| POST   | `/api/login.php`                   | Inicia sesión, devuelve token (7 días)        |
-| POST   | `/api/logout.php`                  | Invalida el token                             |
-| GET    | `/api/cuyos.php`                   | Lista de cuyos (con su último puntaje)        |
-| GET    | `/api/cuyos.php?id=1`              | Un cuyo                                       |
-| POST   | `/api/cuyos.php`                   | Crea `{ name, sex, age_months, weight_g }`    |
-| PUT    | `/api/cuyos.php?id=1`              | Actualiza                                     |
-| DELETE | `/api/cuyos.php?id=1`              | Elimina (y sus evaluaciones)                  |
-| GET    | `/api/foods.php`                   | Catálogo de alimentos                         |
-| GET    | `/api/evaluations.php[?cuyo_id=1]` | Historial (opcionalmente de un cuyo)          |
-| GET    | `/api/evaluations.php?id=7`        | Detalle: alimentos + recomendaciones          |
-| POST   | `/api/evaluations.php`             | Evalúa y guarda `{ cuyo_id, items: [{ food_id, quantity }] }` |
-| DELETE | `/api/evaluations.php?id=7`        | Elimina una evaluación                        |
+| GET    | `/api/health`                      | Estado del servicio y de la BD (sin token)    |
+| POST   | `/api/auth/login`                  | Inicia sesión, devuelve token (7 días)        |
+| POST   | `/api/auth/logout`                 | Invalida el token                             |
+| GET    | `/api/foods`                       | Catálogo de alimentos                         |
+| GET    | `/api/cuyos`                       | Lista de cuyos (con su último puntaje)        |
+| GET    | `/api/cuyos/1`                     | Un cuyo                                       |
+| POST   | `/api/cuyos`                       | Crea `{ name, sex, age_months, weight_g }`    |
+| PUT    | `/api/cuyos/1`                     | Actualiza                                     |
+| DELETE | `/api/cuyos/1`                     | Elimina (y sus evaluaciones)                  |
+| GET    | `/api/cuyos/1/evaluations`         | Historial de un cuyo                          |
+| GET    | `/api/evaluations`                 | Historial del usuario                         |
+| GET    | `/api/evaluations/7`               | Detalle: alimentos + recomendaciones          |
+| POST   | `/api/evaluations`                 | Evalúa y guarda `{ cuyo_id, items: [{ food_id, quantity }] }` |
+| DELETE | `/api/evaluations/7`               | Elimina una evaluación                        |
 
-Códigos de respuesta: `200/201` éxito · `400` datos inválidos · `401` sesión inválida · `403` usuario inactivo · `404` no existe (o es de otro usuario) · `405` método no permitido · `500` error del servidor.
+Códigos de respuesta: `200/201` éxito · `400` datos inválidos · `401` sesión inválida · `403` usuario inactivo o archivo interno · `404` no existe (o es de otro usuario) · `405` método no permitido · `500` error del servidor.
 
 ---
 
@@ -196,7 +219,7 @@ Códigos de respuesta: `200/201` éxito · `400` datos inválidos · `401` sesi�
 - Las evaluaciones se guardan en una **transacción**: se guarda todo o nada.
 
 **Frontend**
-- `ApiService` convierte cualquier fallo en un `ApiError` de un tipo concreto: `network`, `unauthorized`, `validation`, `not_found` o `server`.
+- El interceptor `apiErrorInterceptor` convierte cualquier fallo en un `ApiError` de un tipo concreto: `network`, `unauthorized`, `validation`, `not_found` o `server`.
 - Sesión expirada (`401`): se cierra la sesión local y la app vuelve al login automáticamente.
 - Formularios reactivos con validaciones (las mismas reglas que el backend) y mensajes bajo cada campo.
 - Confirmación antes de eliminar.
@@ -258,7 +281,8 @@ Si tu Node es más antiguo, puedes anteponer `npx -p node@24` a cualquier comand
 Cada vez que cambies el código, ejecuta `npm run build` y haz commit también de la carpeta `app/`.
 
 ### Pruebas automatizadas
-- **Unitarias (Vitest):** `AgePipe`, `StorageService`, `SyncService` (cola offline: encolar, sincronizar, reintentar, descartar) y `AppComponent`.
+- **Unitarias (Vitest):** `ApiService` + interceptores (token, errores, sin conexión, 401, caché, barra de carga), `AgePipe`, `StorageService`, `SyncService` (cola offline: encolar, sincronizar, reintentar, descartar) y `AppComponent`.
+- **Capturas y video automáticos (Playwright):** `docs/evidencias/generar-evidencias.mjs`, ver [`EVIDENCIAS.md`](EVIDENCIAS.md).
 - **De punta a punta (manual con Playwright):** login, CRUD completo, evaluación, historial, modo offline con recarga, sincronización y logout. Los resultados están en la bitácora.
 
 ---
@@ -276,7 +300,7 @@ npx cap open android           # abre Android Studio -> Build > Build APK(s)
 ```
 
 - El celular y la PC con XAMPP deben estar en la **misma red WiFi**.
-- La URL del servidor se cambia dentro de la app, en **Perfil → Servidor**. Ejemplo: `http://192.168.1.50/proyecto/api`. Para saber la IP de tu PC, ejecuta `ipconfig`.
+- La URL del servidor se cambia dentro de la app, en **Perfil → Servidor**. Ejemplo: `http://192.168.1.50/proyecto/api`. Con **Probar conexión** se comprueba antes de guardarla. Para saber la IP de tu PC, ejecuta `ipconfig`.
 - Si Windows bloquea la conexión, permite Apache en el Firewall (redes privadas).
 
 ---

@@ -1,13 +1,14 @@
 <?php
 // =========================================
-// Endpoint: /api/evaluations.php  -> Evaluaciones de dieta
+// Endpoint: /api/evaluations  -> Evaluaciones de dieta
 // Requiere header: Authorization: Bearer <token>
 //
-// GET                -> Historial del usuario (opcional ?cuyo_id=3 para filtrar)
-// GET    ?id=7       -> Detalle: alimentos elegidos + recomendaciones
-// POST               -> Evalúa una dieta y la guarda
+// GET    /api/evaluations                -> Historial del usuario
+// GET    /api/cuyos/3/evaluations        -> Historial de un cuyo (= ?cuyo_id=3)
+// GET    /api/evaluations/7              -> Detalle: alimentos elegidos + recomendaciones
+// POST   /api/evaluations                -> Evalúa una dieta y la guarda
 //                       Body: { "cuyo_id": 3, "items": [{ "food_id": 1, "quantity": 2 }, ...] }
-// DELETE ?id=7       -> Elimina una evaluación
+// DELETE /api/evaluations/7              -> Elimina una evaluación
 // =========================================
 
 require_once __DIR__ . '/helpers.php';

@@ -1,0 +1,1 @@
+import {g,aJ as je,aK as Di,aL as q}from'./main-DNVC5IXG.js';function w(t){t||(t=g(je));let i=new q(e=>{if(t.destroyed){e.next();return}return t.onDestroy(e.next.bind(e))});return e=>e.pipe(Di(i))}export{w};

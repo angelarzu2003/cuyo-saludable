@@ -1,6 +1,6 @@
 <?php
 // =========================================
-// Endpoint: POST /api/login.php
+// Endpoint: POST /api/auth/login  (login.php)
 // Body (JSON): { "email": "demo@correo.com", "password": "123456" }
 // =========================================
 

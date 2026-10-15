@@ -1,6 +1,6 @@
 <?php
 // =========================================
-// Endpoint: POST /api/logout.php
+// Endpoint: POST /api/auth/logout  (logout.php)
 // Elimina el token de sesión para que ya no pueda usarse.
 // Requiere header: Authorization: Bearer <token>
 // =========================================

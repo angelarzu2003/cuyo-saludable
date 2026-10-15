@@ -1,78 +1,65 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import axios, { AxiosRequestConfig } from 'axios';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ApiErrorKind } from '../interfaces';
-import { ConnectivityService } from './connectivity.service';
-import { SessionService } from './session.service';
+import { HealthResponse } from '../interfaces';
+import { ENDPOINTS } from './api-endpoints';
+import { isNetworkError } from './api-error';
 import { StorageService } from './storage.service';
 
 const API_URL_KEY = 'apiUrl';
 const CACHE_PREFIX = 'cache:';
-const TIMEOUT_MS = 8000;
-const SERVER_UNREACHABLE = [502, 503, 504];
-
-/** Error de la API con un mensaje listo para mostrar al usuario. */
-export class ApiError extends Error {
-  constructor(message: string, readonly kind: ApiErrorKind) {
-    super(message);
-  }
-}
-
-/** true si el error se debe a que no hay conexión con el servidor. */
-export function isNetworkError(error: unknown): boolean {
-  return error instanceof ApiError && error.kind === 'network';
-}
 
 /**
- * Cliente HTTP de la app (Axios). Centraliza:
- * - La URL del backend y el token de sesión en cada petición.
- * - La conversión de cualquier fallo en un ApiError con mensaje claro.
+ * Cliente de la API REST (Angular HttpClient). Centraliza:
+ * - La URL del servidor (editable desde Perfil, útil al usar la app en un celular).
+ * - Las peticiones GET / POST / PUT / DELETE, devueltas como Promise.
  * - La caché para poder mostrar datos sin conexión.
+ *
+ * El token y la conversión de errores los agregan los interceptores
+ * (auth.interceptor.ts y api-error.interceptor.ts) a TODAS las peticiones.
  */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
+  private http = inject(HttpClient);
   private storage = inject(StorageService);
-  private session = inject(SessionService);
-  private connectivity = inject(ConnectivityService);
-  private router = inject(Router);
 
-  /** URL del backend. Se puede cambiar desde Perfil (útil al usar la app en un celular). */
+  /** URL del backend, ej. http://192.168.1.50/proyecto/api */
   readonly baseUrl = signal(this.storage.get<string>(API_URL_KEY) ?? environment.apiUrl);
 
   setBaseUrl(url: string): void {
-    const cleanUrl = url.trim().replace(/\/+$/, ''); // sin "/" al final
+    const cleanUrl = normalizeUrl(url);
     this.baseUrl.set(cleanUrl);
     this.storage.set(API_URL_KEY, cleanUrl);
   }
 
-  get<T>(url: string): Promise<T> {
-    return this.request<T>({ method: 'GET', url });
+  get<T>(path: string): Promise<T> {
+    return this.request<T>('GET', path);
   }
 
-  post<T>(url: string, data?: unknown): Promise<T> {
-    return this.request<T>({ method: 'POST', url, data });
+  post<T>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>('POST', path, body);
   }
 
-  put<T>(url: string, data: unknown): Promise<T> {
-    return this.request<T>({ method: 'PUT', url, data });
+  put<T>(path: string, body: unknown): Promise<T> {
+    return this.request<T>('PUT', path, body);
   }
 
-  delete<T>(url: string): Promise<T> {
-    return this.request<T>({ method: 'DELETE', url });
+  delete<T>(path: string): Promise<T> {
+    return this.request<T>('DELETE', path);
   }
 
   /**
    * GET con caché: guarda cada respuesta en el dispositivo y,
    * si no hay conexión, devuelve la última copia guardada.
    */
-  async getCached<T>(url: string): Promise<T> {
+  async getCached<T>(path: string): Promise<T> {
     try {
-      const data = await this.get<T>(url);
-      this.storage.set(CACHE_PREFIX + url, data);
+      const data = await this.get<T>(path);
+      this.storage.set(CACHE_PREFIX + path, data);
       return data;
     } catch (error) {
-      const cached = this.storage.get<T>(CACHE_PREFIX + url);
+      const cached = this.storage.get<T>(CACHE_PREFIX + path);
       if (isNetworkError(error) && cached !== null) {
         return cached;
       }
@@ -84,56 +71,17 @@ export class ApiService {
     this.storage.removeByPrefix(CACHE_PREFIX);
   }
 
-  private async request<T>(config: AxiosRequestConfig): Promise<T> {
-    const token = this.session.token;
-    try {
-      const { data } = await axios.request<T>({
-        ...config,
-        baseURL: this.baseUrl(),
-        timeout: TIMEOUT_MS,
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      this.connectivity.markOnline();
-      return data;
-    } catch (error) {
-      throw this.toApiError(error, token !== null);
-    }
+  /** Comprueba si la API responde en esa URL (GET /health), sin guardarla. */
+  checkHealth(url = this.baseUrl()): Promise<HealthResponse> {
+    return firstValueFrom(this.http.get<HealthResponse>(normalizeUrl(url) + ENDPOINTS.health));
   }
 
-  /** Convierte cualquier error en un ApiError con un mensaje claro para el usuario. */
-  private toApiError(error: unknown, hadSession: boolean): ApiError {
-    if (!axios.isAxiosError(error)) {
-      return new ApiError('Ocurrió un error inesperado', 'server');
-    }
-
-    // Sin respuesta: no hay internet, el servidor está apagado o tardó demasiado.
-    // 502/503/504 también indican servidor inalcanzable (el Service Worker responde 504 sin red).
-    if (!error.response || SERVER_UNREACHABLE.includes(error.response.status)) {
-      this.connectivity.markOffline();
-      return new ApiError('Sin conexión con el servidor. Inténtalo cuando vuelvas a estar en línea.', 'network');
-    }
-
-    this.connectivity.markOnline();
-    const message: string = error.response.data?.message ?? 'Error del servidor';
-
-    switch (error.response.status) {
-      case 401:
-        if (hadSession) {
-          this.endExpiredSession();
-        }
-        return new ApiError(message, 'unauthorized');
-      case 400:
-        return new ApiError(message, 'validation');
-      case 404:
-        return new ApiError(message, 'not_found');
-      default:
-        return new ApiError(message, 'server');
-    }
+  private request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    return firstValueFrom(this.http.request<T>(method, this.baseUrl() + path, { body }));
   }
+}
 
-  /** El token ya no es válido: se cierra la sesión local y se vuelve al login. */
-  private endExpiredSession(): void {
-    this.session.clear();
-    this.router.navigateByUrl('/login', { replaceUrl: true });
-  }
+/** Quita espacios y la "/" final: "http://pc/api/ " -> "http://pc/api" */
+function normalizeUrl(url: string): string {
+  return url.trim().replace(/\/+$/, '');
 }

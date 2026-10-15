@@ -1,0 +1,40 @@
+# =========================================
+# Rutas REST de la API (Apache mod_rewrite, incluido en XAMPP)
+#
+# El cliente usa URLs limpias por recurso:   /api/cuyos/5
+# y Apache las convierte al script PHP:       /api/cuyos.php?id=5
+# Las URLs antiguas (*.php) siguen funcionando.
+# =========================================
+
+RewriteEngine On
+
+# Asegura que el header "Authorization: Bearer <token>" llegue a PHP
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# --- Sesión y estado del servicio ---
+RewriteRule ^auth/login/?$   login.php  [L,QSA]
+RewriteRule ^auth/logout/?$  logout.php [L,QSA]
+RewriteRule ^health/?$       health.php [L,QSA]
+
+# --- Catálogo ---
+RewriteRule ^foods/?$ foods.php [L,QSA]
+
+# --- Cuyos (CRUD) ---
+RewriteRule ^cuyos/?$                     cuyos.php                 [L,QSA]
+RewriteRule ^cuyos/([0-9]+)/?$            cuyos.php?id=$1           [L,QSA]
+# Sub-recurso de solo lectura: historial de un cuyo
+RewriteCond %{REQUEST_METHOD} ^(GET|OPTIONS)$
+RewriteRule ^cuyos/([0-9]+)/evaluations/?$ evaluations.php?cuyo_id=$1 [L,QSA]
+
+# --- Evaluaciones ---
+RewriteRule ^evaluations/?$          evaluations.php       [L,QSA]
+RewriteRule ^evaluations/([0-9]+)/?$ evaluations.php?id=$1 [L,QSA]
+
+# --- Cualquier otra ruta inexistente: 404 en JSON (no la página HTML de Apache) ---
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ not_found.php [L]
+
+# Archivos internos (conexión, funciones, reglas): solo se usan con require, no por URL
+<FilesMatch "^(config|helpers|diet_evaluator)\.php$">
+    Require all denied
+</FilesMatch>

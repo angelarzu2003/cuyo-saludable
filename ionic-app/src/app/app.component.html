@@ -1,3 +1,7 @@
 <ion-app>
+  <!-- Barra de carga global: visible mientras haya una petición a la API en curso -->
+  @if (loading.isBusy()) {
+    <ion-progress-bar type="indeterminate" color="warning" class="global-loading"></ion-progress-bar>
+  }
   <ion-router-outlet></ion-router-outlet>
 </ion-app>
